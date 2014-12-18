@@ -1,0 +1,79 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <pthread.h>
+#include <time.h>
+#define MAX 3
+
+int number =0;
+pthread_t id[2];
+pthread_mutex_t mut; //初始化静态互斥锁
+
+void thread1(void)
+{
+    int i;
+    printf("Hello,I am pthread1!\n");
+    for (i=0; i<MAX; i++)
+    {
+        pthread_mutex_lock(&mut);  //此处上锁，保证number的唯一性
+            number ++;  
+            printf("Thread1:number = %d\n",number);
+        pthread_mutex_unlock(&mut);
+        sleep(1);  //linux c下 sleep(minute),里面变量单位是分钟
+    }
+    pthread_exit(NULL); //线程通过执行此函数，终止执行。返回是一个空指针类型
+}
+
+void thread2(void)
+{
+    int j;
+    printf("Hello,I'm pthread2\n");
+    for(j=0; j<MAX; j++)
+    {
+        pthread_mutex_lock(&mut);
+             number ++;
+             printf("Thread2:number = %d\n",number);
+        pthread_mutex_unlock(&mut);
+        sleep(1);
+    }
+    pthread_exit(NULL);
+}
+
+void thread_create(void)
+{
+    int temp;
+    memset(&id, 0, sizeof(id));
+if(temp = pthread_create(&id[0], NULL, (void *)thread1, NULL)!= 0)
+                          //参数：线程标识符指针 线程属性  线程运行函数起始地址  运行函数属性
+                          //创建成功返回 0
+        printf("Thread 1 fail to create!\n");
+    else
+        printf("Thread 1 created\n");
+    if(temp = pthread_create(&id[1], NULL, (void *)thread2, NULL)!= 0)
+        printf("Thread 2 fail to create!\n");
+    else
+        printf("Thread 2 created!\n");
+ }  
+void thread_wait()
+{
+    if(id[0] != 0)
+    {
+        pthread_join(id[0], NULL); //等待线程结束，使用此函数对创建的线程资源回收
+        printf("Thread1 completed!\n");
+    }
+    if(id[1] != 0)
+    {
+        pthread_join(id[1], NULL);
+        printf("Thread2 completed!\n");
+    }
+}
+int main(void)
+{
+int i,ret1,ret2;
+pthread_mutex_init(&mut, NULL); //动态互斥锁
+    printf("Main fuction,creating thread...\n");
+    thread_create();
+    printf("Main fuction, waiting for the pthread end!\n");
+    thread_wait();
+    return (0);
+}
