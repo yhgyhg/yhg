@@ -1,0 +1,19 @@
+#include<stdio.h>
+#include<fcntl.h>
+main()
+{
+int fd;
+char *buf[];
+char Name[100];
+printf("Please input your name:");
+scanf("%s", &Name);
+if((fd=open(Name, O_RDWR|O_CREAT|O_APPEND, 0755))==-1){
+    printf("Error when creating file!\n");
+    exit(0);
+}
+printf("Please input your words:\n");
+scanf("%s",&buf);
+write(fd, buf, sizeof(buf));
+close(fd);
+return 0;
+}
